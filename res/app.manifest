@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  MineDown 的进程清单。
+
+  requestedExecutionLevel 故意写成 asInvoker：下载一个原版版本不该强迫用户
+  每次都点 UAC，也不该让命令行自检（tests/mock_test.py、selftest 模式）在
+  非管理员控制台里因为 ERROR_ELEVATION_REQUIRED 直接起不来。
+
+  真正需要管理员的时候由程序自己申请：下载遇到「拒绝访问」、装加载器写不进
+  libraries/ 时，失败弹窗里有「以管理员身份重试」按钮，走 ShellExecuteExW
+  的 runas 动作重新启动自己（见 src/core/Elevation.cpp）；也可以用 elevate
+  命令行开关启动，或直接右键「以管理员身份运行」。
+
+  注意：XML 注释里不能出现连续两个减号，所以这里提到命令行开关时不写前导横线。
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity type="win32" name="MineDown.MineDown" version="0.1.0.0" processorArchitecture="amd64"/>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10 / 11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
+      <!-- Windows 8.1 -->
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
+    </application>
+  </compatibility>
+</assembly>

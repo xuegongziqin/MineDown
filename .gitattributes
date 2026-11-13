@@ -1,0 +1,8 @@
+# 仓库里统一存 LF；工作区按平台还原。
+# 批处理必须保持 CRLF —— cmd.exe 对纯 LF 的 .bat 在 goto/label 上会出怪问题。
+* text=auto
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.ico binary
+*.png binary

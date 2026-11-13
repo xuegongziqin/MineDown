@@ -1,0 +1,10 @@
+// Windows resources: exe icon shown by Explorer / taskbar,
+// plus the application manifest (UAC level, supported OS).
+// Keep this file pure ASCII.
+#include <windows.h>
+
+IDI_ICON1 ICON "icon.ico"
+
+// id 1 = CREATEPROCESS_MANIFEST_RESOURCE_ID; the manifest declares
+// asInvoker and the program elevates itself on demand (src/core/Elevation.cpp).
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "app.manifest"

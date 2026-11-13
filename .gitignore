@@ -1,0 +1,18 @@
+# 构建产物：build\ 里是 .o / 中间文件，dist\ 是 windeployqt 出来的完整发布目录
+build/
+dist/
+
+# 测试脚手架：mock_test.py 会在 tests\_run 下造几百 MB 的假游戏目录
+tests/_run/
+__pycache__/
+*.pyc
+
+# 本地助手的记忆/索引目录，不属于项目内容
+.memsearch/
+
+# 写代码时参考的第三方源码（PCL 启动器），不随本项目分发
+GUIDE/
+
+# Windows 垃圾文件
+Thumbs.db
+desktop.ini
