@@ -1,6 +1,6 @@
 # MineDown
 
-一个用 **Qt 6 / C++20 / GNU g++** 手写的 Minecraft Java 版下载器：图形界面、多线程下载、SHA1 校验、断点续传、多镜像切换，并且能装 **Fabric / Forge / NeoForge** 加载器。
+一个用 **Qt 6 / C++20 / GNU g++** 写的 Minecraft Java 版下载器：图形界面、多线程下载、SHA1 校验、断点续传、多镜像切换，并且能装 **Fabric / Forge / NeoForge** 加载器。
 
 做两件事：把游戏文件下到位、把模组加载器装到位（不启动游戏、不下载 JRE）。目标目录结构与官方启动器一致，装完即可被任何启动器识别。
 
@@ -233,16 +233,37 @@ res/
 落不了盘）。这类文件的 `LastWriteTime` 往往比其它文件早很多，`icacls <文件>` 会直接报
 「拒绝访问」。
 
-修复（用**管理员**身份打开命令提示符或 PowerShell，执行一次即可）：
+修复：用**管理员**身份跑一次下面这段（和具体盘符、用户名、系统语言都无关）。
+
+先打开管理员命令行：开始菜单输入 `cmd` → 右键「以管理员身份运行」；或者把下面的内容
+存成 `fix.bat`，右键「以管理员身份运行」。
 
 ```bat
-takeown /f "D:\Game\.minecraft" /r /d y
-icacls "D:\Game\.minecraft" /grant *S-1-5-32-545:(OI)(CI)M /t /c
+:: 1) 找到游戏目录：优先读本程序自己存的设置，读不到就用官方启动器的默认位置
+for /f "tokens=2,*" %%A in ('reg query "HKCU\Software\MineDown\MineDown\game" /v rootDir 2^>nul ^| find "rootDir"') do set "MC=%%B"
+if not defined MC set "MC=%APPDATA%\.minecraft"
+set "MC=%MC:/=\%"
+echo 目标目录：%MC%
+
+:: 2) 目录不在上面这两个位置的话，自己指定（写程序标题栏/日志里显示的「游戏目录」）
+:: set "MC=D:\Somewhere\.minecraft"
+
+:: 3) 收回所有权，再给 Users 组「修改」权限（与新建目录的默认 ACL 一致）
+takeown /f "%MC%" /r /d y
+icacls "%MC%" /grant *S-1-5-32-545:(OI)(CI)M /t /c
 ```
 
-第一条把目录里所有文件的所有权收归 Administrators，第二条给 Users 组授予修改权限
-（与新建目录的默认权限一致）。修完重新点「开始下载」即可：已下载并通过 SHA1 的
-`.part` 会被保留复用，不会整份重下。
+- `takeown` 把目录树里每个文件的所有者改成 Administrators，`icacls` 再放开写权限；
+  `*S-1-5-32-545` 是 `BUILTIN\Users` 的 SID，用它就不受系统语言影响（中文「Users」、
+  德文「Benutzer」都一样）。
+- 直接粘进 cmd 窗口而不是存成 .bat 时，把 `%%A`、`%%B` 改成 `%A`、`%B`（批处理里才需要双写）。
+- 跑之前最好先用同一个管理员窗口 `dir "%MC%"` 确认路径对；两个命令都会打印
+  `成功处理 N 个文件`，失败数为 0 就说明修好了。
+- 如果 `icacls` 仍有个别文件报「拒绝访问」（常见于目录本身被移动过、带了互相冲突的
+  显式 ACE），补一条 `icacls "%MC%" /reset /t /c` 让它重新继承父目录权限，再重跑第 3 步。
+
+修完重新点「开始下载」即可：已下载并通过 SHA1 的 `.part` 会被保留复用，不会整份重下。
+也可以直接用失败弹窗里的「以管理员身份重试」——它会带着当前版本自动重跑。
 
 ---
 
