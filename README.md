@@ -253,8 +253,6 @@ takeown /f "%MC%" /r /d y
 icacls "%MC%" /grant *S-1-5-32-545:(OI)(CI)M /t /c
 ```
 
-- 代码块故意全用英文：cmd 按本地代码页逐行读 `.bat`，UTF-8 的中文注释在 GBK 控制台上会被
-  截断，连带把下一行命令读坏（`'efined' 不是内部或外部命令`）。中文说明都放在代码块外面。
 - `takeown` 把目录树里每个文件的所有者改成 Administrators，`icacls` 再放开写权限；
   `*S-1-5-32-545` 是 `BUILTIN\Users` 的 SID，用它就不受系统语言影响（中文「Users」、
   德文「Benutzer」都一样），也不用先知道当前用户名。
