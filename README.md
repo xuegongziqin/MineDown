@@ -239,16 +239,16 @@ res/
 存成 `fix.bat`，右键「以管理员身份运行」。
 
 ```bat
-:: 1) 找到游戏目录：优先读本程序自己存的设置，读不到就用官方启动器的默认位置
+rem 1) 找到游戏目录：优先读本程序自己存的设置，读不到就用官方启动器的默认位置
 for /f "tokens=2,*" %%A in ('reg query "HKCU\Software\MineDown\MineDown\game" /v rootDir 2^>nul ^| find "rootDir"') do set "MC=%%B"
 if not defined MC set "MC=%APPDATA%\.minecraft"
 set "MC=%MC:/=\%"
 echo 目标目录：%MC%
 
-:: 2) 目录不在上面这两个位置的话，自己指定（写程序标题栏/日志里显示的「游戏目录」）
-:: set "MC=D:\Somewhere\.minecraft"
+rem 2) 目录不在上面这两个位置的话，自己指定（写程序标题栏/日志里显示的「游戏目录」）
+rem set "MC=D:\Somewhere\.minecraft"
 
-:: 3) 收回所有权，再给 Users 组「修改」权限（与新建目录的默认 ACL 一致）
+rem 3) 收回所有权，再给 Users 组「修改」权限（与新建目录的默认 ACL 一致）
 takeown /f "%MC%" /r /d y
 icacls "%MC%" /grant *S-1-5-32-545:(OI)(CI)M /t /c
 ```
