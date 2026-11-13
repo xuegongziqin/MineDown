@@ -236,29 +236,31 @@ res/
 修复：用**管理员**身份跑一次下面这段（和具体盘符、用户名、系统语言都无关）。
 
 先打开管理员命令行：开始菜单输入 `cmd` → 右键「以管理员身份运行」；或者把下面的内容
-存成 `fix.bat`，右键「以管理员身份运行」。
+存成 `fix.bat`（记事本另存为时编码选 **ANSI**），右键「以管理员身份运行」。
 
 ```bat
-rem 1) 找到游戏目录：优先读本程序自己存的设置，读不到就用官方启动器的默认位置
+rem 1) find the game dir: MineDown's own setting first, vanilla default as fallback
 for /f "tokens=2,*" %%A in ('reg query "HKCU\Software\MineDown\MineDown\game" /v rootDir 2^>nul ^| find "rootDir"') do set "MC=%%B"
 if not defined MC set "MC=%APPDATA%\.minecraft"
 set "MC=%MC:/=\%"
-echo 目标目录：%MC%
+echo [INFO] game dir = "%MC%"
 
-rem 2) 目录不在上面这两个位置的话，自己指定（写程序标题栏/日志里显示的「游戏目录」）
+rem 2) if neither of those is your game dir, set it yourself (see the app's "game dir" field)
 rem set "MC=D:\Somewhere\.minecraft"
 
-rem 3) 收回所有权，再给 Users 组「修改」权限（与新建目录的默认 ACL 一致）
+rem 3) take ownership, then grant BUILTIN\Users the Modify right (same as a fresh folder)
 takeown /f "%MC%" /r /d y
 icacls "%MC%" /grant *S-1-5-32-545:(OI)(CI)M /t /c
 ```
 
+- 代码块故意全用英文：cmd 按本地代码页逐行读 `.bat`，UTF-8 的中文注释在 GBK 控制台上会被
+  截断，连带把下一行命令读坏（`'efined' 不是内部或外部命令`）。中文说明都放在代码块外面。
 - `takeown` 把目录树里每个文件的所有者改成 Administrators，`icacls` 再放开写权限；
   `*S-1-5-32-545` 是 `BUILTIN\Users` 的 SID，用它就不受系统语言影响（中文「Users」、
-  德文「Benutzer」都一样）。
+  德文「Benutzer」都一样），也不用先知道当前用户名。
 - 直接粘进 cmd 窗口而不是存成 .bat 时，把 `%%A`、`%%B` 改成 `%A`、`%B`（批处理里才需要双写）。
 - 跑之前最好先用同一个管理员窗口 `dir "%MC%"` 确认路径对；两个命令都会打印
-  `成功处理 N 个文件`，失败数为 0 就说明修好了。
+  `已处理 N 个文件`，失败数为 0 就说明修好了。
 - 如果 `icacls` 仍有个别文件报「拒绝访问」（常见于目录本身被移动过、带了互相冲突的
   显式 ACE），补一条 `icacls "%MC%" /reset /t /c` 让它重新继承父目录权限，再重跑第 3 步。
 
